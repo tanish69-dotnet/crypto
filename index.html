@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CryptoNova — Real-Time Crypto Intelligence</title>
+  <meta name="description" content="Track top cryptocurrencies in real-time with beautiful charts, live prices, and market data. A premium crypto intelligence dashboard." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dark-theme">
+
+  <!-- Custom Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Three.js Canvas Background -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Floating Background Orbs -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+  </div>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="18" stroke="url(#lg1)" stroke-width="2"/>
+            <path d="M13 20 L20 13 L27 20 L20 27 Z" fill="url(#lg2)"/>
+            <path d="M20 13 L20 7" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M27 20 L33 20" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M20 27 L20 33" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M13 20 L7 20" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="lg1" x1="0" y1="0" x2="40" y2="40">
+                <stop offset="0%" stop-color="#7c3aed"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+              <linearGradient id="lg2" x1="0" y1="0" x2="40" y2="40">
+                <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">Crypto<span class="logo-accent">Nova</span></span>
+      </div>
+
+      <div class="nav-center">
+        <div class="search-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search coins..." class="search-input" autocomplete="off" />
+          <div class="search-shortcut">⌘K</div>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <select id="currency-select" class="currency-select">
+          <option value="usd">🇺🇸 USD</option>
+          <option value="inr">🇮🇳 INR</option>
+          <option value="eur">🇪🇺 EUR</option>
+          <option value="btc">₿ BTC</option>
+          <option value="eth">Ξ ETH</option>
+        </select>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <button class="watchlist-btn" id="watchlist-toggle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          Watchlist
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== HERO TICKER ===== -->
+  <div class="ticker-bar">
+    <div class="ticker-track" id="ticker-track">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP ===== -->
+  <main class="main-content">
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+      <div class="hero-text">
+        <span class="hero-badge">🔴 LIVE</span>
+        <h1 class="hero-title">Real-Time Crypto <br/><span class="gradient-text">Intelligence</span></h1>
+        <p class="hero-subtitle">Track top 50 cryptocurrencies with live prices, market data, and beautiful analytics.</p>
+      </div>
+      <div class="hero-stats" id="hero-stats">
+        <div class="stat-card glass">
+          <div class="stat-label">Total Market Cap</div>
+          <div class="stat-value" id="stat-mktcap">—</div>
+          <div class="stat-change" id="stat-mktcap-change">—</div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-label">24h Volume</div>
+          <div class="stat-value" id="stat-volume">—</div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-label">BTC Dominance</div>
+          <div class="stat-value" id="stat-btc-dom">—</div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-label">Active Coins</div>
+          <div class="stat-value" id="stat-coins">50</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sort + Filter Bar -->
+    <div class="controls-bar" id="controls-bar">
+      <div class="sort-buttons">
+        <button class="sort-btn active" data-sort="market_cap">Market Cap</button>
+        <button class="sort-btn" data-sort="current_price">Price</button>
+        <button class="sort-btn" data-sort="price_change_percentage_24h">24h Change</button>
+        <button class="sort-btn" data-sort="total_volume">Volume</button>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="view-grid" title="Grid view">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </button>
+        <button class="view-btn" id="view-list" title="List view">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="2" rx="1"/><rect x="3" y="11" width="18" height="2" rx="1"/><rect x="3" y="18" width="18" height="2" rx="1"/></svg>
+        </button>
+      </div>
+      <div class="last-updated">
+        <span class="pulse-dot"></span>
+        Last updated: <span id="last-updated-time">—</span>
+      </div>
+    </div>
+
+    <!-- Gainers / Losers -->
+    <div class="movers-section" id="movers-section">
+      <div class="movers-card glass" id="top-gainers">
+        <h3 class="movers-title gainers">🚀 Top Gainers</h3>
+        <div class="movers-list" id="gainers-list">
+          <div class="skeleton-mover"></div>
+          <div class="skeleton-mover"></div>
+          <div class="skeleton-mover"></div>
+        </div>
+      </div>
+      <div class="movers-card glass" id="top-losers">
+        <h3 class="movers-title losers">📉 Top Losers</h3>
+        <div class="movers-list" id="losers-list">
+          <div class="skeleton-mover"></div>
+          <div class="skeleton-mover"></div>
+          <div class="skeleton-mover"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Watchlist Panel -->
+    <div class="watchlist-panel glass" id="watchlist-panel" style="display:none;">
+      <h3>⭐ My Watchlist</h3>
+      <div id="watchlist-content" class="watchlist-grid"></div>
+      <p class="watchlist-empty" id="watchlist-empty">No coins in your watchlist yet. Click the ⭐ on any coin to add it.</p>
+    </div>
+
+    <!-- Loading Skeletons -->
+    <div class="coins-grid" id="coins-grid">
+      <!-- Skeleton -->
+      <div class="coin-card skeleton-card" id="skeleton-container">
+        <div class="sk-header"></div>
+        <div class="sk-price"></div>
+        <div class="sk-change"></div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" id="error-state" style="display:none;">
+      <div class="error-icon">⚠️</div>
+      <h3>Failed to fetch data</h3>
+      <p>The CoinGecko API may be rate-limiting. Retrying in <span id="retry-countdown">30</span>s…</p>
+      <button class="retry-btn" onclick="loadCoins()">Retry Now</button>
+    </div>
+
+  </main>
+
+  <!-- ===== COIN DETAIL MODAL ===== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal glass" id="coin-modal">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div class="modal-header" id="modal-header"></div>
+      <div class="modal-chart-wrap">
+        <canvas id="modal-chart"></canvas>
+      </div>
+      <div class="modal-stats" id="modal-stats"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>Built with ❤️ by <strong>CryptoNova</strong></span>
+      <span>Data by <a href="https://www.coingecko.com" target="_blank">CoinGecko</a></span>
+      <span>Updates every 30s</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
