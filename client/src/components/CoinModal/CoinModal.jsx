@@ -20,7 +20,7 @@ export default function CoinModal() {
   const { data: history, isLoading: histLoading } = useQuery({
     queryKey: ['history', coin?.id, currency],
     queryFn: async () => {
-      const { data } = await axios.get(`https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart`, { params: { vs_currency: currency, days: 7 } });
+      const { data } = await axios.get(`/api/history/${coin.id}`, { params: { currency, days: 7 } });
       return data;
     },
     enabled: !!coin,

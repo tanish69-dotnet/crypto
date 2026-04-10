@@ -22,6 +22,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
 
-app.listen(PORT, () => {
-  console.log(`\x1b[36m🚀 CryptoNova API → http://localhost:${PORT}\x1b[0m`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\x1b[36m🚀 CryptoNova API → http://localhost:${PORT}\x1b[0m`);
+  });
+}
+
+module.exports = app;
