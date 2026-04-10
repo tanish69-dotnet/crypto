@@ -13,7 +13,8 @@ import CoinsGrid from './components/CoinCard/CoinsGrid';
 import CoinModal from './components/CoinModal/CoinModal';
 
 export default function App() {
-  const { theme, showWatchlist, selectedCoin } = useCryptoStore();
+  const { showWatchlist, selectedCoin } = useCryptoStore();
+  const theme = 'dark'; // Force dark theme since toggle is removed
 
   // Sync theme attribute
   useEffect(() => {
